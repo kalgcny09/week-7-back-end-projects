@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Chat App - Node and Sockets</title>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<style>
+	body {
+		background-color: #e580ff;
+	}
+
+	.container {
+		border: 2px solid black;
+	}
+
+	#DC {
+		height: 70px;
+		font-size: 25px;
+		text-align: center;
+	}
+
+	#topUsers {
+		text-align: center;
+	}
+
+	#topMessages {
+		text-align: center;
+	}
+
+
+	#users {
+		border: 2px solid black;
+		height: 50vh;
+		text-align: center;
+	}
+
+
+	#messages {
+		height: 50vh;
+		border: 2px solid black;
+		
+	}
+
+	#submit {
+		text-align: center;
+	}
+
+	#new-message {
+		width: 300px;
+		height: 70px;
+	}
+
+	#send-message {
+	
+	}
+</style>
+
+</head>
+<body>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="col-sm-4">
+			</div>
+			<div class="col-sm-4" id="DC">
+			DIGITAL CRAFTS'S CHATROOM
+			</div>
+
+			<div class="col-sm-4">
+				
+			</div>
+
+		</div>
+	</div>
+	<div class="row">
+			<div class="col-sm-2" id="topUsers">
+			ONLINE USERS
+			</div>
+
+			<div id="topMessages" class="col-sm-8">
+			MESSAGES
+			</div>
+
+			<div class="col-sm-2">
+			</div>
+	</div>
+	<div class="row">
+			<div class="col-sm-2" id="users">
+
+			</div>
+
+			<div id="messages" class="col-sm-8">
+
+			</div>
+
+			<div class="col-sm-2">
+			</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="col-sm-4">
+			</div>
+			<div class="col-sm-4" id="submit">
+				<form id="submit-message">
+					<input type="text" id="new-message"/>
+					<button id="send-message" class="btn btn-primary">
+					Click to send Messages to Server
+					</button>
+				</form>
+			</div>
+			<div class="col-sm-4">
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+
+<script type="text/javascript">
+	console.log("Browser Javascript");
+
+	var name = prompt("what is your name?");
+	
+	var time = new Date();
+	var timestamp = time.toLocaleTimeString();
+
+	console.log(time);
+
+	var socketio = io.connect('http://127.0.0.1:8000');
+
+	socketio.emit('nameToServer',name);
+
+	socketio.emit('timeToServer',timestamp);
+
+	socketio.on('newUser', (userName)=>{
+		console.log(userName + " just joined!");
+		var usersDiv = document.getElementById('users');
+		usersDiv.innerHTML += `<div class="col-sm-12">${userName}</div>`;
+	});
+
+
+	$('#submit-message').submit(function(event){
+		event.preventDefault();
+		var newMessage = $('#new-message').val();
+
+		socketio.emit('messageToServer',{
+
+			newMessage:newMessage,
+			name:name,
+			timestamp:timestamp
+		});
+	});
+
+	socketio.on('messageToClient',(message)=> {
+		$('#messages').prepend(`<p>${message}</p>`);
+	});
+</script>
+
+</body>
+</html>
